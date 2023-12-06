@@ -2,7 +2,7 @@
 Ranger plugin for neovim
 
 ### Screenshot
-![Screenshot](./Screenshot.git)
+![Screenshot](./Screenshot.gif)
 
 ### Dependencies
 [ranger](https://github.com/ranger/ranger)
