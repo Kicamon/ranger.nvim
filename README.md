@@ -27,19 +27,23 @@ lua require('ranger').setup()
 ```
 
 ### Usage
-use command `Ranger` or shortcut key `R`
+use command `Ranger` or shortcut keys
 
 ### Configuration
 defualt config 
 ```lua
 require('ranger').setup({
-  key = 'R',
   win = {
     width = 0.8,
     height = 0.8,
     position = 'cc',
   },
-  open = 'edit'
+  open = {
+    ['edit'] = '<leader>re',
+    ['tabedit'] = '<leader>rt',
+    ['split'] = '<leader>rs',
+    ['vsplit'] = '<leader>rv',
+  }
 })
 ```
 
