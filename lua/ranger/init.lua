@@ -30,7 +30,7 @@ local function CleanUp()
 end
 
 local function RangerOpen(name)
-  vim.api.nvim_create_autocmd('TermEnter', {
+  vim.api.nvim_create_autocmd('TermOpen', {
     buffer = bufnr,
     callback = function()
       vim.api.nvim_command('file ' .. name)
