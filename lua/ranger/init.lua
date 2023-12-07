@@ -29,11 +29,12 @@ local function CleanUp()
   vim.fn.delete(tempname)
 end
 
-local function TabName(name)
+local function RangerOpen(name)
   vim.api.nvim_create_autocmd('TermEnter', {
     buffer = bufnr,
     callback = function()
       vim.api.nvim_command('file ' .. name)
+      vim.cmd([[startinsert]])
     end
   })
 end
@@ -56,7 +57,7 @@ local function Ranger(open)
   })
   WinInfo = Win:GetInfo()
   winnr, bufnr = WinInfo.winnr, WinInfo.bufnr
-  TabName('Ranger')
+  RangerOpen('Ranger')
   tempname = vim.fn.tempname()
   vim.fn.termopen('ranger --choosefiles="' .. tempname .. '"', {
     on_exit = function()
