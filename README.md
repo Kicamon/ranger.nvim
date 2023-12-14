@@ -40,9 +40,9 @@ require('ranger').setup({
   },
   open = {
     ['edit'] = '<leader>re',
-    ['tabedit'] = '<leader>rt',
-    ['split'] = '<leader>rs',
-    ['vsplit'] = '<leader>rv',
+    ['tabedit'] = nil,
+    ['split'] = nil,
+    ['vsplit'] = nil,
   }
 })
 ```

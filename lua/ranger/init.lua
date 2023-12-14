@@ -10,9 +10,9 @@ local opt = {
   },
   open = {
     ['edit'] = '<leader>re',
-    ['tabedit'] = '<leader>rt',
-    ['split'] = '<leader>rs',
-    ['vsplit'] = '<leader>rv',
+    ['tabedit'] = nil,
+    ['split'] = nil,
+    ['vsplit'] = nil,
   }
 }
 
@@ -71,7 +71,9 @@ local function Ranger(open)
 end
 
 local function kmap(open)
-  vim.keymap.set('n', opt.open[open], function() Ranger(open) end, {})
+  if opt.open[open] ~= nil then
+    vim.keymap.set('n', opt.open[open], function() Ranger(open) end, {})
+  end
 end
 
 local function setup(opts)
