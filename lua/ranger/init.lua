@@ -2,6 +2,7 @@ local prev_win = -1
 local winnr = -1
 local bufnr = -1
 local tempname = ''
+local workpath = ''
 local opt = {
   win = {
     width = 0.8,
@@ -25,8 +26,9 @@ local function OpenFile(open)
   end
 end
 
-local function CleanUp()
+local function EndOpt()
   vim.fn.delete(tempname)
+  vim.cmd('silent! lcd ' .. workpath)
 end
 
 local function RangerOpen(name)
@@ -47,6 +49,8 @@ end
 
 local function Ranger(open)
   prev_win = vim.api.nvim_get_current_win()
+  workpath = vim.fn.getcwd()
+  vim.cmd('silent! lcd %:p:h')
   local Win = require("ranger.FloatWin")
   Win:Create({
     width = opt.win.width,
@@ -64,8 +68,8 @@ local function Ranger(open)
       if vim.api.nvim_win_is_valid(winnr) then
         CloseFloatWin()
         OpenFile(open or 'edit')
-        CleanUp()
       end
+      EndOpt()
     end
   })
 end
