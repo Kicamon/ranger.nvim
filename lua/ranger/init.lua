@@ -19,6 +19,9 @@ local opt = {
 
 local function OpenFile(open)
   if vim.fn.filereadable(vim.fn.expand(tempname)) == 1 then
+    if vim.api.nvim_buf_get_name(0) == '' then
+      open = 'edit'
+    end
     local filenames = vim.fn.readfile(tempname)
     for _, filename in ipairs(filenames) do
       vim.cmd(string.format(':%s %s', open, filename))
