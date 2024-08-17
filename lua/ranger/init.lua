@@ -1,97 +1,96 @@
-local prev_win = -1
-local winnr = -1
-local bufnr = -1
-local tempname = ''
-local workpath = ''
-local opt = {
-  win = {
+local api = vim.api
+local win = require('ranger.window')
+local infos = {}
+local config = {}
+
+local function open_file(open, opt)
+  if opt == 'left' then
+    vim.cmd('set nosplitright')
+  elseif opt == 'down' then
+    vim.cmd('set splitbelow')
+  elseif opt == 'up' then
+    vim.cmd('set nosplitbelow')
+  elseif opt == 'right' then
+    vim.cmd('set splitright')
+  end
+
+  if vim.fn.filereadable(vim.fn.expand(infos.tempname)) == 1 then
+    local filenames = vim.fn.readfile(infos.tempname)
+    for _, filename in ipairs(filenames) do
+      vim.cmd(open .. ' ' .. filename)
+    end
+  end
+end
+
+local function end_options()
+  vim.fn.delete(infos.tempname)
+  vim.cmd('silent! lcd ' .. infos.workpath)
+end
+
+local function ranger(open, opt)
+  infos.workpath = vim.fn.getcwd()
+  infos.tempname = vim.fn.tempname()
+
+  vim.cmd('silent! lcd %:p:h')
+
+  local float_opt = config
+
+  if infos.bufnr then
+    float_opt.bufnr = infos.bufnr
+    api.nvim_set_option_value('modified', false, { scope = 'local', buf = infos.bufnr })
+  end
+
+  infos.bufnr, infos.winid = win:new_float(float_opt, true, true):wininfo()
+
+  vim.fn.termopen(string.format('ranger --choosefiles="%s"', infos.tempname), {
+    on_exit = function()
+      if api.nvim_win_is_valid(infos.winid) then
+        api.nvim_win_close(infos.winid, true)
+        infos.winid = nil
+        open_file(open, opt)
+      end
+      end_options()
+    end,
+  })
+end
+
+local function defualt()
+  return {
     width = 0.8,
     height = 0.8,
-    position = 'cc',
-  },
-  open = {
-    ['edit'] = '<leader>re',
-    ['tabedit'] = nil,
-    ['split'] = nil,
-    ['vsplit'] = nil,
+    title = ' Yazi ',
+    relative = 'editor',
+    row = 'c',
+    col = 'c',
   }
-}
-
-local function OpenFile(open)
-  if vim.fn.filereadable(vim.fn.expand(tempname)) == 1 then
-    if vim.api.nvim_buf_get_name(0) == '' then
-      open = 'edit'
-    end
-    local filenames = vim.fn.readfile(tempname)
-    for _, filename in ipairs(filenames) do
-      vim.cmd(string.format(':%s %s', open, filename))
-    end
-  end
-end
-
-local function EndOpt()
-  vim.fn.delete(tempname)
-  vim.cmd('silent! lcd ' .. workpath)
-end
-
-local function RangerOpen(name)
-  vim.api.nvim_create_autocmd('TermOpen', {
-    buffer = bufnr,
-    callback = function()
-      vim.api.nvim_command('file ' .. name)
-      vim.cmd([[startinsert]])
-    end
-  })
-end
-
-local function CloseFloatWin()
-  vim.api.nvim_win_close(winnr, true)
-  vim.api.nvim_buf_delete(bufnr, { force = true })
-  vim.api.nvim_set_current_win(prev_win)
-end
-
-local function Ranger(open)
-  prev_win = vim.api.nvim_get_current_win()
-  workpath = vim.fn.getcwd()
-  vim.cmd('silent! lcd %:p:h')
-  local Win = require("ranger.FloatWin")
-  Win:Create({
-    width = opt.win.width,
-    height = opt.win.height,
-    title = ' Ranger ',
-  }, {
-    pos = opt.win.position,
-  })
-  WinInfo = Win:GetInfo()
-  winnr, bufnr = WinInfo.winnr, WinInfo.bufnr
-  RangerOpen('Ranger')
-  tempname = vim.fn.tempname()
-  vim.fn.termopen('ranger --choosefiles="' .. tempname .. '"', {
-    on_exit = function()
-      if vim.api.nvim_win_is_valid(winnr) then
-        CloseFloatWin()
-        OpenFile(open or 'edit')
-      end
-      EndOpt()
-    end
-  })
-end
-
-local function kmap(open)
-  if opt.open[open] ~= nil then
-    vim.keymap.set('n', opt.open[open], function() Ranger(open) end, {})
-  end
 end
 
 local function setup(opts)
-  opt = vim.tbl_extend('force', opt, opts or {})
-  kmap('edit')
-  kmap('tabedit')
-  kmap('split')
-  kmap('vsplit')
-  vim.api.nvim_create_user_command('Ranger', Ranger, {})
+  config = vim.tbl_extend('force', defualt(), opts or {})
+
+  if config.pos then
+    config.row = config.win.pos:sub(1, 1)
+    config.col = config.win.pos:sub(2, 2)
+    config.pos = nil
+  end
+
+  api.nvim_create_user_command('Ranger', function(args)
+    if #args.args == 0 then
+      ranger('edit')
+    elseif args.args == 'left' then
+      ranger('vsplit', 'lefs')
+    elseif args.args == 'down' then
+      ranger('split', 'down')
+    elseif args.args == 'up' then
+      ranger('split', 'up')
+    elseif args.args == 'right' then
+      ranger('vsplit', 'right')
+    elseif args.args == 'tabe' then
+      ranger('tabe')
+    else
+      error('Wrong parameters')
+    end
+  end, { nargs = '?' })
 end
 
-return {
-  setup = setup
-}
+return { setup = setup }

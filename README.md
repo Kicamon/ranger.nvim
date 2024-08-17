@@ -4,8 +4,7 @@ Ranger plugin for neovim
 ### Screenshot
 ![Screenshot](./Screenshot.gif)
 
-### Dependencies
-[ranger](https://github.com/ranger/ranger)
+### Dependencies:[ranger](https://github.com/ranger/ranger)
 
 ### Install
 **lazy.nvim**
@@ -13,6 +12,8 @@ Ranger plugin for neovim
 ```lua
 {
   "Kicamon/ranger.nvim",
+  lazy = true,
+  cmd = "Ranger",
   config = function()
     require('ranger').setup()
   end
@@ -22,28 +23,27 @@ Ranger plugin for neovim
 **vim-plug**
 
 ```vim
-Plug "Kicamon/ranger.nvim"
+Plug "Kicamon/ranger.nvim", {['on'] = 'Ranger' }}
 lua require('ranger').setup()
 ```
 
-### Usage
-use command `Ranger` or shortcut keys
+### command
+| open           | description                       |
+|----------------|-----------------------------------|
+| `Ranger`       | Open files in buffers             |
+| `Ranger edit`  | Open files in tabs                |
+| `Ranger left`  | Open the file in the left window  |
+| `Ranger down`  | Open the file in the lower window |
+| `Ranger up`    | Open the file in the top window   |
+| `Ranger right` | Open the file in the right window |
 
 ### Configuration
-defualt config 
+defualt config
 ```lua
 require('ranger').setup({
-  win = {
-    width = 0.8,
-    height = 0.8,
-    position = 'cc',
-  },
-  open = {
-    ['edit'] = '<leader>re',
-    ['tabedit'] = nil,
-    ['split'] = nil,
-    ['vsplit'] = nil,
-  }
+  width = 0.8,
+  height = 0.8,
+  position = 'cc',
 })
 ```
 
@@ -67,13 +67,5 @@ require('ranger').setup({
 |              |                   |               |
 +--------------+-------------------+---------------+
 ```
-
-#### open
-| open      | description                    |
-|-----------|--------------------------------|
-| `edit`    | open files in buffers          |
-| `tabedit` | open files in tabs             |
-| `split`   | open files in horizontal split |
-| `vsplit`  | open files in vertical split   |
 
 ### License MIT
