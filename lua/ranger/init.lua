@@ -58,7 +58,7 @@ local function defualt()
   return {
     width = 0.8,
     height = 0.8,
-    title = ' Yazi ',
+    title = ' Ranger ',
     relative = 'editor',
     row = 'c',
     col = 'c',
