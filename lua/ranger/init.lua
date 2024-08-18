@@ -42,6 +42,8 @@ local function ranger(open, opt)
 
   infos.bufnr, infos.winid = win:new_float(float_opt, true, true):wininfo()
 
+  vim.cmd('startinsert')
+
   vim.fn.termopen(string.format('ranger --choosefiles="%s"', infos.tempname), {
     on_exit = function()
       if api.nvim_win_is_valid(infos.winid) then
