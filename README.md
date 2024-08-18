@@ -1,10 +1,10 @@
 # ranger.nvim
-Ranger plugin for neovim
+Ranger lightweight plugin for neovim
 
 ### Screenshot
 ![Screenshot](./Screenshot.gif)
 
-### Dependencies:[ranger](https://github.com/ranger/ranger)
+### Dependencies: [ranger](https://github.com/ranger/ranger)
 
 ### Install
 **lazy.nvim**
@@ -31,7 +31,7 @@ lua require('ranger').setup()
 | open           | description                       |
 |----------------|-----------------------------------|
 | `Ranger`       | Open files in buffers             |
-| `Ranger edit`  | Open files in tabs                |
+| `Ranger tabe`  | Open files in tabs                |
 | `Ranger left`  | Open the file in the left window  |
 | `Ranger down`  | Open the file in the lower window |
 | `Ranger up`    | Open the file in the top window   |
