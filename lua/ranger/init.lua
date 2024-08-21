@@ -80,7 +80,7 @@ local function setup(opts)
     if #args.args == 0 then
       ranger('edit')
     elseif args.args == 'left' then
-      ranger('vsplit', 'lefs')
+      ranger('vsplit', 'left')
     elseif args.args == 'down' then
       ranger('split', 'down')
     elseif args.args == 'up' then
