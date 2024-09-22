@@ -3,15 +3,27 @@ local win = require('ranger.window')
 local infos = {}
 local config = {}
 
+local set_split = {
+  ['left'] = 'nosplitright',
+  ['down'] = 'splitbelow',
+  ['up'] = 'nosplitbelow',
+  ['right'] = 'splitright',
+}
+
+local function defualt()
+  return {
+    width = 0.8,
+    height = 0.8,
+    title = ' Ranger ',
+    relative = 'editor',
+    row = 'c',
+    col = 'c',
+  }
+end
+
 local function open_file(open, opt)
-  if opt == 'left' then
-    vim.cmd('set nosplitright')
-  elseif opt == 'down' then
-    vim.cmd('set splitbelow')
-  elseif opt == 'up' then
-    vim.cmd('set nosplitbelow')
-  elseif opt == 'right' then
-    vim.cmd('set splitright')
+  if opt then
+    vim.cmd.set(set_split[opt])
   end
 
   if vim.fn.filereadable(vim.fn.expand(infos.tempname)) == 1 then
@@ -40,7 +52,8 @@ local function ranger(open, opt)
     api.nvim_set_option_value('modified', false, { buf = infos.bufnr })
   end
 
-  infos.bufnr, infos.winid = win:new_float(float_opt, true, true):wininfo()
+  infos.bufnr, infos.winid =
+    win:new_float(float_opt, true, true):bufopt('bufhidden', 'hide'):wininfo()
 
   vim.cmd('startinsert')
 
@@ -48,23 +61,35 @@ local function ranger(open, opt)
     on_exit = function()
       if api.nvim_win_is_valid(infos.winid) then
         api.nvim_win_close(infos.winid, true)
-        infos.winid = nil
-        open_file(open, opt)
       end
+      infos.winid = nil
+      open_file(open, opt)
       end_options()
     end,
   })
 end
 
-local function defualt()
-  return {
-    width = 0.8,
-    height = 0.8,
-    title = ' Ranger ',
-    relative = 'editor',
-    row = 'c',
-    col = 'c',
-  }
+local commands = {
+  left = function()
+    ranger('vsplit', 'left')
+  end,
+  down = function()
+    ranger('split', 'down')
+  end,
+  up = function()
+    ranger('split', 'up')
+  end,
+  right = function()
+    ranger('vsplit', 'right')
+  end,
+}
+
+local function load_command(cmd)
+  commands[cmd]()
+end
+
+local function commands_list()
+  return vim.tbl_keys(commands)
 end
 
 local function setup(opts)
@@ -79,23 +104,17 @@ local function setup(opts)
   api.nvim_create_user_command('Ranger', function(args)
     if #args.args == 0 then
       ranger('edit')
-    elseif args.args == 'left' then
-      ranger('vsplit', 'left')
-    elseif args.args == 'down' then
-      ranger('split', 'down')
-    elseif args.args == 'up' then
-      ranger('split', 'up')
-    elseif args.args == 'right' then
-      ranger('vsplit', 'right')
-    elseif args.args == 'tabe' then
-      ranger('tabe')
     else
-      error('Wrong parameters')
+      load_command(args.args)
     end
   end, {
+    range = true,
     nargs = '?',
-    complete = function()
-      return { 'edit', 'tabe', 'left', 'down', 'up', 'right' }
+    complete = function(arg)
+      local list = commands_list()
+      return vim.tbl_filter(function(s)
+        return string.match(s, '^' .. arg)
+      end, list)
     end,
   })
 end

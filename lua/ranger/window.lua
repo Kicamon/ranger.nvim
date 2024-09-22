@@ -3,7 +3,7 @@ local win = {}
 
 ---set float window's anchor
 ---@param opts table
----@return string
+---@return string anchor
 local function make_floating_popup_anchor(opts)
   local anchor = ''
 
@@ -16,8 +16,8 @@ end
 ---set folating window's size
 ---@param opts table
 ---@param ui table {height: integer, width:integer}
----@return integer
----@return integer
+---@return integer width
+---@return integer height
 local function make_floating_popup_size(opts, ui)
   opts.width = opts.width >= 0 and opts.width or -opts.width
   opts.height = opts.height >= 0 and opts.height or -opts.height
@@ -33,15 +33,15 @@ end
 ---get windows position
 ---@param opts table {row: char|integer, col: char|integer}
 ---@param ui table {height: integer, width:integer}
----@return integer
----@return integer
+---@return integer row
+---@return integer col
 local function get_position(opts, ui)
   local row, col
 
   if type(opts.row) == 'number' then
     row = opts.row
   elseif opts.row == 'c' then
-    row = math.floor((ui.height - opts.height + 0.5) / 2)
+    row = math.floor((ui.height - opts.height) / 2 + 0.5)
   elseif opts.row == 't' then
     row = 0
   elseif opts.row == 'b' then
@@ -51,7 +51,7 @@ local function get_position(opts, ui)
   if type(opts.col) == 'number' then
     col = opts.col
   elseif opts.col == 'c' then
-    col = math.floor((ui.width - opts.width + 0.5) / 2)
+    col = math.floor((ui.width - opts.width) / 2 + 0.5)
   elseif opts.col == 'l' then
     col = 0
   elseif opts.col == 'r' then
@@ -98,10 +98,28 @@ local function default()
   }
 end
 
+local obj = {}
+obj.__index = obj
+
+---set bufopt
+---@param name string|table
+---@param value any
+---@return table
+function obj:bufopt(name, value)
+  if type(name) == 'table' then
+    for key, val in pairs(name) do
+      api.nvim_set_option_value(key, val, { buf = self.bufnr })
+    end
+  else
+    api.nvim_set_option_value(name, value, { buf = self.bufnr })
+  end
+  return self
+end
+
 ---get window's information
----@return integer
----@return integer
-function win:wininfo()
+---@return integer bunnr
+---@return integer winid
+function obj:wininfo()
   return self.bufnr, self.winid
 end
 
@@ -119,7 +137,7 @@ function win:new_float(float_opt, enter, force)
   float_opt = force and make_floating_popup_options(float_opt)
     or vim.tbl_extend('force', default(), float_opt)
   self.winid = api.nvim_open_win(self.bufnr, enter, float_opt)
-  return self
+  return setmetatable(win, obj)
 end
 
 --- quick set position
